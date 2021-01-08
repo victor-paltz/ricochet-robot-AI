@@ -1,12 +1,14 @@
+from typing import Tuple
+
 import numpy as np
 
 
 def angular_dist_modulo(a: float, b: float, angle: float = np.pi/2) -> float:
-    """ angle between lignes of angles a and b modulo the given angle"""
+    """Angle between lignes with angles a and b, modulo the given angle"""
     return min((a-b) % angle, angle-(a-b) % angle)
 
 
-def intersection(line1, line2):
+def intersection(line1: Tuple[float, float], line2: Tuple[float, float]) -> Tuple[float, float]:
     """Finds the intersection of two lines given in Hesse normal form.
 
     Returns closest integer pixel locations.

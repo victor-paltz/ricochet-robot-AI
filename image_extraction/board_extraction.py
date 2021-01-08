@@ -9,6 +9,9 @@ from tools.kruskal import kruskal_groups
 
 
 def extract(board: Union[np.ndarray, Any]) -> np.ndarray:
+    """
+    Extract the board game image from a picture
+    """
 
     # extract the lines of the image
     gray = cv2.cvtColor(np.array(board), cv2.COLOR_BGR2GRAY)

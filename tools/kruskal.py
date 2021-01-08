@@ -1,9 +1,18 @@
 
+from typing import Callable, Iterable, List
+
 import numpy as np
+
 from tools.UnionFind import UnionFind
 
 
-def kruskal_groups(data, dist, nb_groups, d_max=np.float("inf")):
+def kruskal_groups(data: Iterable[float], dist: Callable[[float, float], float], nb_groups: int,
+                   d_max: float = np.float("inf")) -> List[List[float]]:
+    """
+    Gather the elements of the input data in groups using the kruskal algorithm
+    nb_groups is the number of groups desired and d_max is the threshold for which
+    we stop merging elements because they are too far.
+    """
 
     n = len(data)
     current_nb_groups = n
