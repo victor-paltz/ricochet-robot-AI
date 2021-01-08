@@ -90,7 +90,7 @@ def extract(board: Union[np.ndarray, Any]) -> np.ndarray:
     size = 600
     pts2 = np.float32([[0, 0], [size, 0], [0, size], [size, size]])
     M = cv2.getPerspectiveTransform(pts1, pts2)
-    dst = cv2.warpPerspective(np.array(plateau), M, (size, size))
+    dst = cv2.warpPerspective(np.array(board), M, (size, size))
 
     return dst
 
