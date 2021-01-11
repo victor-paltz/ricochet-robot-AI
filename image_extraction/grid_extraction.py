@@ -1,6 +1,6 @@
 
 
-from enum import IntEnum, unique
+from enum import IntFlag, unique
 from typing import Dict, List, Tuple
 
 import cv2
@@ -12,7 +12,7 @@ from image_extraction.board_extraction import extract_board
 
 
 @unique
-class Color(IntEnum):
+class Color(IntFlag):
     BLUE = 0
     YELLOW = 1
     GREEN = 2
@@ -21,11 +21,23 @@ class Color(IntEnum):
 
 
 @unique
-class Wall(IntEnum):
+class Wall(IntFlag):
     TOP = int("1000", 2)
     BOTTOM = int("0100", 2)
     LEFT = int("0010", 2)
     RIGHT = int("0001", 2)
+
+    def rank(self):
+        """
+        returns int(np.log2(direction.value))-1 but faster
+        """
+        if self is Wall.TOP:
+            return 3
+        if self is Wall.BOTTOM:
+            return 2
+        if self is Wall.LEFT:
+            return 1
+        return 0
 
 
 def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .85) -> List[Tuple[int, int]]:

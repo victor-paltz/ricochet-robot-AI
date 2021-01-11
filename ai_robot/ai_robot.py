@@ -15,28 +15,28 @@ def transform_grid(grid: np.ndarray) -> np.ndarray:
         for j in range(grid.shape[1]):
             if grid[i, j] & Wall.LEFT:
                 rank = j
-            new_grid[int(np.log2(Wall.LEFT.value))-1, i, j] = rank
+            new_grid[Wall.LEFT.rank(), i, j] = rank
 
     for i in range(grid.shape[0]):
         rank = grid.shape[1]-1
         for j in range(grid.shape[1]-1, -1, -1):
             if grid[i, j] & Wall.RIGHT:
                 rank = j
-            new_grid[int(np.log2(Wall.RIGHT.value))-1, i, j] = rank
+            new_grid[Wall.RIGHT.rank(), i, j] = rank
 
     for j in range(grid.shape[1]):
         rank = 0
         for i in range(grid.shape[0]):
             if grid[i, j] & Wall.TOP:
                 rank = i
-            new_grid[int(np.log2(Wall.TOP.value))-1, i, j] = rank
+            new_grid[Wall.TOP.rank(), i, j] = rank
 
     for j in range(grid.shape[1]):
         rank = grid.shape[0]-1
         for i in range(grid.shape[0]-1, -1, -1):
             if grid[i, j] & Wall.BOTTOM:
                 rank = i
-            new_grid[int(np.log2(Wall.BOTTOM.value))-1, i, j] = rank
+            new_grid[Wall.BOTTOM.rank(), i, j] = rank
 
     return new_grid
 
@@ -44,7 +44,7 @@ def transform_grid(grid: np.ndarray) -> np.ndarray:
 def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) -> Tuple[int, int]:
     i, j = src
     if direction is Wall.LEFT:
-        j2 = new_grid[int(np.log2(direction.value))-1, i, j]
+        j2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[0] == i
         if np.any(robot_on_line):
             j_in_middle = [j_robot+1 for j_robot in state2[1]
@@ -53,7 +53,7 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
                 return i, min(j_in_middle)
         return i, j2
     elif direction is Wall.RIGHT:
-        j2 = new_grid[int(np.log2(direction.value))-1, i, j]
+        j2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[0] == i
         if np.any(robot_on_line):
             j_in_middle = [j_robot+1 for j_robot in state2[1]
@@ -62,7 +62,7 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
                 return i, max(j_in_middle)
         return i, j2
     elif direction is Wall.TOP:
-        i2 = new_grid[int(np.log2(direction.value))-1, i, j]
+        i2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[1] == j
         if np.any(robot_on_line):
             i_in_middle = [i_robot+1 for i_robot in state2[0]
@@ -71,7 +71,7 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
                 return min(i_in_middle), j
         return i2, j
     elif direction is Wall.BOTTOM:
-        i2 = new_grid[int(np.log2(direction.value))-1, i, j]
+        i2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[1] == j
         if np.any(robot_on_line):
             i_in_middle = [i_robot+1 for i_robot in state2[0]
