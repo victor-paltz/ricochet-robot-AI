@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict
 
 import numpy as np
 from image_extraction.board_extraction import Orientation
