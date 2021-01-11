@@ -42,6 +42,7 @@ def transform_grid(grid: np.ndarray) -> np.ndarray:
 
 
 def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) -> Tuple[int, int]:
+
     i, j = src
     if direction is Wall.LEFT:
         j2 = new_grid[direction.rank(), i, j]
@@ -56,7 +57,7 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
         j2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[0] == i
         if np.any(robot_on_line):
-            j_in_middle = [j_robot+1 for j_robot in state2[1]
+            j_in_middle = [j_robot-1 for j_robot in state2[1]
                            [robot_on_line] if j < j_robot <= j2]
             if j_in_middle:
                 return i, max(j_in_middle)
@@ -74,7 +75,7 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
         i2 = new_grid[direction.rank(), i, j]
         robot_on_line = state2[1] == j
         if np.any(robot_on_line):
-            i_in_middle = [i_robot+1 for i_robot in state2[0]
+            i_in_middle = [i_robot-1 for i_robot in state2[0]
                            [robot_on_line] if i < i_robot <= i2]
             if i_in_middle:
                 return max(i_in_middle), j
@@ -87,3 +88,52 @@ def transform_state(state: Dict[str, Tuple[int, int]]) -> np.ndarray:
         state2[0, color.value] = state[color][0]
         state2[1, color.value] = state[color][1]
     return state2
+
+
+def explore(new_grid, initial_state, dst: Tuple[int, int], rec=3):
+    """
+    Dumb and slow BFS, needs optimizations
+    20 seconds for exploration at distance 7
+    """
+    seen = set()
+    to_see = [initial_state]
+
+    path = {str(initial_state): (str(initial_state), "", "")}
+
+    if tuple(initial_state[0, :]) == dst:
+        return []
+
+    for n in range(rec):
+        print(n)
+        new_to_see = []
+
+        for state in to_see:
+            if str(state) not in seen:
+                seen.add(str(state))
+                if n != rec - 1:
+                    for color in Color:
+                        i = color.value
+                        for direction in Wall:
+                            new_pos = move(new_grid, tuple(
+                                state[:, i]), direction, state)
+                            new_state = state.copy()
+                            new_state[0, i] = new_pos[0]
+                            new_state[1, i] = new_pos[1]
+
+                            if str(new_state) not in seen and str(new_state) not in path:
+                                new_to_see.append(new_state)
+                                path[str(new_state)] = (
+                                    str(state), color, direction)
+
+                            if tuple(new_state[:, 0]) == dst:
+                                res = [(color, direction)]
+                                prev_state = str(state)
+
+                                while prev_state != str(initial_state):
+                                    prev_state, color, direction = path[prev_state]
+                                    res += [(color, direction)]
+                                return list(reversed(res))
+
+        to_see = new_to_see
+
+    # return path, to_see
