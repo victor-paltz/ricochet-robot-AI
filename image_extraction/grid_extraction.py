@@ -1,7 +1,7 @@
 
 
 from enum import IntEnum, unique
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import cv2
 import matplotlib.pyplot as plt
@@ -12,6 +12,15 @@ from image_extraction.board_extraction import extract_board
 
 
 @unique
+class Color(IntEnum):
+    BLUE = 0
+    YELLOW = 1
+    GREEN = 2
+    RED = 3
+    #BLACK = 2
+
+
+@unique
 class Wall(IntEnum):
     TOP = int("1000", 2)
     BOTTOM = int("0100", 2)
@@ -19,7 +28,7 @@ class Wall(IntEnum):
     RIGHT = int("0001", 2)
 
 
-def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .8) -> List[Tuple[int, int]]:
+def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .85) -> List[Tuple[int, int]]:
 
     if np.sum(black_white_board == 255) > np.sum(black_white_board == 0):
         black_white_board = 255 - black_white_board
@@ -44,6 +53,11 @@ def get_wall_grid(board: np.ndarray) -> np.ndarray:
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     edges2 = cv2.dilate(thresh, kernel, iterations=1)
     edges2 = cv2.erode(edges2, kernel, iterations=1)
+
+    # hsv = cv2.cvtColor(board, cv2.COLOR_BGR2HSV)
+    # lower_black = np.array([0, 0, 0])
+    # upper_black = np.array([255, 150, 100])
+    # mask = cv2.inRange(hsv, lower_black, upper_black)
 
     # create empty grid
     grid = np.zeros((16, 16), dtype=np.uint8)
@@ -80,6 +94,54 @@ def get_wall_grid(board: np.ndarray) -> np.ndarray:
     # TODO improve matching with edges
 
     return grid
+
+
+def split_board(board: np.ndarray, grid_size: int = 16, zoom: float = 1.) -> np.ndarray:
+
+    tile_size = board.shape[0]//grid_size
+    extra = 2*int(((zoom-1)*tile_size)//2)
+    board_grid = np.zeros((grid_size, grid_size, tile_size + extra,
+                           tile_size+extra, *board.shape[2:]), dtype=np.uint8)
+
+    for i in range(grid_size):
+        for j in range(grid_size):
+            try:
+                board_grid[i, j, :, :, :] = board[max(0, i*tile_size-extra//2):(i+1)*tile_size + extra//2,
+                                                  max(0, j*tile_size-extra//2):(j+1)*tile_size + extra//2, :]
+            except:
+                pass
+
+    return board_grid
+
+
+def get_bot_location(board_grid: np.ndarray) -> Dict[str, Tuple[int, int]]:
+
+    hsv_bounderies = {}
+    hsv_bounderies[Color.RED] = {"lower": np.array(
+        [120, 100, 120]), "upper": np.array([140, 255, 255])}
+    hsv_bounderies[Color.YELLOW] = {"lower": np.array(
+        [90, 100, 120]), "upper": np.array([120, 255, 255])}
+    hsv_bounderies[Color.BLUE] = {"lower": np.array(
+        [0, 100, 120]), "upper": np.array([20, 255, 255])}
+    hsv_bounderies[Color.GREEN] = {"lower": np.array(
+        [40, 100, 120]), "upper": np.array([90, 255, 255])}
+
+    bot_pos = {}
+
+    for color in Color:
+        matchs = []
+        for i in range(board_grid.shape[0]):
+            for j in range(board_grid.shape[1]):
+                if 7 <= i <= 9 and 7 <= j <= 9:
+                    continue
+                img = board_grid[i, j]
+                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+                mask = cv2.inRange(hsv, hsv_bounderies[color]["lower"],
+                                   hsv_bounderies[color]["upper"])
+                matchs.append((np.sum(mask), (i, j)))
+        bot_pos[color] = sorted(matchs, reverse=True)[0][1]
+
+    return bot_pos
 
 
 def pretty_print(grid: np.ndarray, size: int = 4) -> Tuple[str, np.ndarray]:
