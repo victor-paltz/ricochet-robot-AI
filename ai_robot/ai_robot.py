@@ -129,7 +129,7 @@ def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec
                                 path[hash_new_state] = (
                                     hash_state, color, direction)
 
-                            if tuple(new_state[:, color_dst.value]) == dst:
+                            if new_state[0, color_dst.value] == dst[0] and new_state[1, color_dst.value] == dst[1]:
                                 res = [(color, direction)]
                                 prev_state = hash_state
 
