@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Iterable
 
 import numpy as np
 from image_extraction.board_extraction import Orientation
@@ -84,12 +84,128 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
         return -1
 
 
+def move_v2(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state: Iterable[Tuple[int, int]]) -> Tuple[int, int]:
+
+    i, j = src
+    if direction is Wall.LEFT:
+        j2 = new_grid[direction.rank(), i, j]
+
+        j_in_middle = []
+        for pos in state:
+            if pos[0] == i:
+                if j2 <= pos[1] < j:
+                    j_in_middle.append(pos[1]+1)
+
+        if j_in_middle:
+            return i, min(j_in_middle)
+        return i, j2
+
+    elif direction is Wall.RIGHT:
+
+        j2 = new_grid[direction.rank(), i, j]
+
+        j_in_middle = []
+        for pos in state:
+            if pos[0] == i:
+                if j < pos[1] <= j2:
+                    j_in_middle.append(pos[1]-1)
+
+        if j_in_middle:
+            return i, max(j_in_middle)
+        return i, j2
+
+    elif direction is Wall.TOP:
+
+        i2 = new_grid[direction.rank(), i, j]
+
+        i_in_middle = []
+        for pos in state:
+            if pos[1] == j:
+                if i2 <= pos[0] < i:
+                    i_in_middle.append(pos[0]+1)
+
+        if i_in_middle:
+            return min(i_in_middle), j
+        return i2, j
+
+    elif direction is Wall.BOTTOM:
+
+        i2 = new_grid[direction.rank(), i, j]
+
+        i_in_middle = []
+        for pos in state:
+            if pos[1] == j:
+                if i < pos[0] <= i2:
+                    i_in_middle.append(pos[0]-1)
+
+        if i_in_middle:
+            return max(i_in_middle), j
+        return i2, j
+
+    else:
+        return -1
+
+
 def transform_state(state: Dict[str, Tuple[int, int]]) -> np.ndarray:
     state2 = np.zeros((2, len(Color)), dtype=np.uint8)
     for color in Color:
         state2[0, color.value] = state[color][0]
         state2[1, color.value] = state[color][1]
     return state2
+
+
+def transform_state_v2(state: Dict[str, Tuple[int, int]]) -> Iterable[Tuple[int, int]]:
+    new_state = [()]*len(state)
+    for color, pos in state.items():
+        new_state[color.value] = pos
+    return tuple(new_state)
+
+
+def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color, rec=3):
+    """
+    Dumb and slow BFS, needs optimizations
+    20 seconds for exploration at distance 7
+    """
+    seen = set()
+    to_see = [initial_state]
+
+    path = {hash(initial_state): (hash(initial_state), "", "")}
+
+    if initial_state[color_dst.value] == dst:
+        return []
+
+    for n in range(rec):
+        print(n, len(to_see))
+        new_to_see = []
+
+        for state in to_see:
+            hash_state = hash(state)
+            if hash_state not in seen:
+                seen.add(hash_state)
+                if n != rec - 1:
+                    for color in Color:
+                        i = color.value
+                        for direction in Wall:
+                            new_pos = move_v2(
+                                new_grid, state[i], direction, state)
+                            new_state = state[:i] + (new_pos,) + state[i+1:]
+                            hash_new_state = hash(new_state)
+
+                            if hash_new_state not in seen and hash_new_state not in path:
+                                new_to_see.append(new_state)
+                                path[hash_new_state] = (
+                                    hash_state, color, direction)
+
+                            if new_state[color_dst.value] == dst:
+                                res = [(color, direction)]
+                                prev_state = hash_state
+
+                                while prev_state != hash(initial_state):
+                                    prev_state, color, direction = path[prev_state]
+                                    res += [(color, direction)]
+                                return list(reversed(res))
+
+        to_see = new_to_see
 
 
 def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec=3):
