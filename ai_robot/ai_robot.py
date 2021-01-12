@@ -80,6 +80,8 @@ def move(new_grid: np.ndarray, src: Tuple[int, int], direction: Wall, state2) ->
             if i_in_middle:
                 return max(i_in_middle), j
         return i2, j
+    else:
+        return -1
 
 
 def transform_state(state: Dict[str, Tuple[int, int]]) -> np.ndarray:

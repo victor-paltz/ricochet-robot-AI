@@ -17,7 +17,13 @@ class Color(IntFlag):
     YELLOW = 1
     GREEN = 2
     RED = 3
-    #BLACK = 2
+    #BLACK = 4
+
+    def rgb_color(self):
+        return {Color.BLUE: (0, 0, 255),
+                Color.YELLOW: (0, 255, 255),
+                Color.GREEN: (0, 255, 0),
+                Color.RED: (255, 0, 0)}[self]
 
 
 @unique
