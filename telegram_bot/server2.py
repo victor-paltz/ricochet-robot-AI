@@ -1,10 +1,10 @@
 import os
 
-from flask import Flask, request
 import telebot
+from flask import Flask, request
+from image_extraction.grid_extraction import Color
 from main import solve
 from PIL import Image
-from image_extraction.grid_extraction import Color
 
 TOKEN = str(os.environ.get("TOKEN", "where-is-my-token"))
 bot = telebot.TeleBot(TOKEN)
