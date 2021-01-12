@@ -42,7 +42,9 @@ plt.subplot(1, 4, 3), plt.imshow(pretty_print(grid, size=10)[
 new_grid = transform_grid(grid)
 state2 = transform_state(state)
 
-path = explore(new_grid, state2, (10, 3), 9)
+start_time = time.time()
+path = explore(new_grid, state2, (3, 6), Color.YELLOW, 11)
+print(f"Exploration done in {(time.time()-start_time):.4} s")
 
 if path is not None:
     plt.subplot(1, 4, 4)

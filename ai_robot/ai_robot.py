@@ -92,7 +92,7 @@ def transform_state(state: Dict[str, Tuple[int, int]]) -> np.ndarray:
     return state2
 
 
-def explore(new_grid, initial_state, dst: Tuple[int, int], rec=3):
+def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec=3):
     """
     Dumb and slow BFS, needs optimizations
     20 seconds for exploration at distance 7
@@ -102,7 +102,7 @@ def explore(new_grid, initial_state, dst: Tuple[int, int], rec=3):
 
     path = {str(initial_state): (str(initial_state), "", "")}
 
-    if tuple(initial_state[0, :]) == dst:
+    if tuple(initial_state[:, color_dst.value]) == dst:
         return []
 
     for n in range(rec):
@@ -127,7 +127,7 @@ def explore(new_grid, initial_state, dst: Tuple[int, int], rec=3):
                                 path[str(new_state)] = (
                                     str(state), color, direction)
 
-                            if tuple(new_state[:, 0]) == dst:
+                            if tuple(new_state[:, color_dst.value]) == dst:
                                 res = [(color, direction)]
                                 prev_state = str(state)
 
