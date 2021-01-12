@@ -45,16 +45,25 @@ def draw(path, board_img, state, new_grid):
         offsets[color] = 32*((i+1)/(n+1) - 1/2)
     print(offsets)
 
+    moves = []
     for i, (color, direction) in enumerate(path):
-        print(state)
         start = state[color]
         end = move(new_grid, start, direction, transform_state(state))
         state[color] = end
+        moves.append((i, color, direction, start, end))
+
+    # for i, (color, direction) in enumerate(path):
+    #     print(state)
+    #     start = state[color]
+    #     end = move(new_grid, start, direction, transform_state(state))
+    #     state[color] = end
+
+    for i, color, direction, start, end in reversed(moves):
         start_point = img_coord_from_case(start)
         end_point = img_coord_from_case(end)
 
         start_point = add_offset(
-            start_point, direction, offsets[color], is_start_point=False)
+            start_point, direction, offsets[color], is_start_point=True)
         end_point = add_offset(end_point, direction,
                                offsets[color], is_start_point=False)
 
@@ -67,7 +76,7 @@ def draw(path, board_img, state, new_grid):
         if end_point[1] == start_point[1]:
             pos = ((start_point[0] + end_point[0])//2, start_point[1] + 10)
         else:
-            pos = (end_point[0]-10, (start_point[1] + end_point[1])//2)
+            pos = (end_point[0] - 10, (start_point[1] + end_point[1])//2)
 
         fontScale = 1
         lineType = cv2.LINE_AA
