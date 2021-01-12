@@ -43,7 +43,8 @@ new_grid = transform_grid(grid)
 state2 = transform_state(state)
 
 start_time = time.time()
-path = explore(new_grid, state2, (3, 6), Color.YELLOW, 11)
+#path = explore(new_grid, state2, (3, 6), Color.YELLOW, 11)
+path = explore(new_grid, state2, (10, 11), Color.RED, 11)
 print(f"Exploration done in {(time.time()-start_time):.4} s")
 
 if path is not None:

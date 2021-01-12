@@ -20,7 +20,7 @@ class Color(IntFlag):
     #BLACK = 4
 
     def rgb_color(self):
-        return {Color.BLUE: (0, 0, 255),
+        return {Color.BLUE: (0, 153, 255),
                 Color.YELLOW: (0, 255, 255),
                 Color.GREEN: (0, 255, 0),
                 Color.RED: (255, 0, 0)}[self]
