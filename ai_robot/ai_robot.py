@@ -1,3 +1,4 @@
+from itertools import product
 from typing import Tuple, Dict, Iterable
 
 import numpy as np
@@ -161,13 +162,16 @@ def transform_state_v2(state: Dict[str, Tuple[int, int]]) -> Iterable[Tuple[int,
     return tuple(new_state)
 
 
-def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color, rec=3):
+def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color, moving_colors=None, rec=13):
     """
-    Dumb and slow BFS, needs optimizations
-    20 seconds for exploration at distance 7
+    Faster BFS, needs optimizations
+    75 seconds for exploration at distance 13
     """
     seen = set()
     to_see = [initial_state]
+
+    if moving_colors is None:
+        moving_colors = list(Color)
 
     path = {hash(initial_state): (hash(initial_state), "", "")}
 
@@ -183,7 +187,7 @@ def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[in
             if hash_state not in seen:
                 seen.add(hash_state)
                 if n != rec - 1:
-                    for color in Color:
+                    for color in moving_colors:
                         i = color.value
                         for direction in Wall:
                             new_pos = move_v2(
@@ -206,6 +210,23 @@ def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[in
                                 return list(reversed(res))
 
         to_see = new_to_see
+
+
+def optimal_explore(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color):
+
+    other_colors = [c for c in Color if c is not color_dst]
+    best_path = None
+    best_path_length = 100
+    rec = 30
+
+    p0 = explore_v2(new_grid, initial_state, dst, color_dst,
+                    moving_colors=[color_dst], rec=best_path_length)
+    if p0 is not None and len(p0) < best_path_length:
+        best_path_length = len(p0)
+        best_path = p0
+
+    for c in Color:
+        pass
 
 
 def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec=3):
