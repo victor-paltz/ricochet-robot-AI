@@ -1,0 +1,1 @@
+web: gunicorn telegram_bot.server2:app --log-file=-
