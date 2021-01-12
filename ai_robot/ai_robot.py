@@ -106,12 +106,13 @@ def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec
         return []
 
     for n in range(rec):
-        print(n)
+        print(n, len(to_see))
         new_to_see = []
 
         for state in to_see:
-            if str(state) not in seen:
-                seen.add(str(state))
+            hash_state = str(state)
+            if hash_state not in seen:
+                seen.add(hash_state)
                 if n != rec - 1:
                     for color in Color:
                         i = color.value
@@ -121,15 +122,16 @@ def explore(new_grid, initial_state, dst: Tuple[int, int], color_dst: Color, rec
                             new_state = state.copy()
                             new_state[0, i] = new_pos[0]
                             new_state[1, i] = new_pos[1]
+                            hash_new_state = str(new_state)
 
-                            if str(new_state) not in seen and str(new_state) not in path:
+                            if hash_new_state not in seen and hash_new_state not in path:
                                 new_to_see.append(new_state)
-                                path[str(new_state)] = (
-                                    str(state), color, direction)
+                                path[hash_new_state] = (
+                                    hash_state, color, direction)
 
                             if tuple(new_state[:, color_dst.value]) == dst:
                                 res = [(color, direction)]
-                                prev_state = str(state)
+                                prev_state = hash_state
 
                                 while prev_state != str(initial_state):
                                     prev_state, color, direction = path[prev_state]
