@@ -1,7 +1,6 @@
 from itertools import combinations, product
 from typing import Dict, Iterable, List, Tuple
 
-import numba as nb
 import numpy
 import numpy as np
 from image_extraction.board_extraction import Orientation
