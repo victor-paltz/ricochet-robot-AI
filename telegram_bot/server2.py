@@ -21,7 +21,7 @@ HELP_MESSAGE = ("Welcome to the ricochet-robot solver!\n\n"
                 "3) Send a new request on the current picture with step 1) or send a new boardgame picture with step 1)\n\n"
 
                 "Ex: If you want to know how the BLUE robot can go to the TOP RIGHT corner, send \"BLUE 1 16\". 1 -> first line, 16 -> last column\n\n"
-                "Pro Tips, \"YELLOW 12 0\", \"Y 12 0\", \"y 12 0\", \"y12 0\" are all accepted")
+                "Pro Tips, \"YELLOW 12 5\", \"Y 12 5\", \"y 12 5\", \"y125\" are all accepted")
 
 # handle commands, /start
 @bot.message_handler(commands=['start'])
@@ -54,6 +54,11 @@ def handle_all_message(message):
     if not (1 <= y <= 16) or not (1 <= x <= 16):
         bot.reply_to(
             message, "Wrong target position, lines and colums are in range 1 -> 16")
+        return
+
+    if (7 <= y <= 8) and (7 <= x <= 8):
+        bot.reply_to(
+            message, "Wrong target position, cannot reach cases in the center")
         return
 
     color = color_string_dict[color_string]

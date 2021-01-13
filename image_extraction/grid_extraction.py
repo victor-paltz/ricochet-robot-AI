@@ -64,10 +64,21 @@ def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: f
 def get_wall_grid(board: np.ndarray) -> np.ndarray:
 
     # Put image in black and white to match walls
-    gray = cv2.cvtColor(board, cv2.COLOR_BGR2GRAY)
+    board2 = cv2.bilateralFilter(board, 19, 75, 75)
+    gray = cv2.cvtColor(board2, cv2.COLOR_BGR2GRAY)
     blur = cv2.bilateralFilter(gray, 3, 75, 75)
     thresh = cv2.adaptiveThreshold(
-        blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 15)
+        blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 21, 15)
+
+    tile_size = 32
+    zoom = 0.8
+    half_cache_size = int(round(zoom*tile_size//2))
+    for i in range(16):
+        for j in range(16):
+            y, x = int((i+.5)*tile_size), int((j+.5)*tile_size)
+            thresh[y-half_cache_size:y+half_cache_size,
+                   x-half_cache_size:x+half_cache_size] = 255
+
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     edges2 = cv2.dilate(thresh, kernel, iterations=1)
     edges2 = cv2.erode(edges2, kernel, iterations=1)
@@ -94,7 +105,7 @@ def get_wall_grid(board: np.ndarray) -> np.ndarray:
     grid[9, 7:9] |= Wall.TOP
 
     # create matching templates for vertical and horizontal walls
-    vertical_template = 255*np.ones((32, 9), np.uint8)
+    vertical_template = 255*np.ones((32, 8), np.uint8)
     horizontal_template = np.rot90(vertical_template, 1)
 
     # Add vertical walls in the grid
