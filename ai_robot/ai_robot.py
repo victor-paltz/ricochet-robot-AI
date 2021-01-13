@@ -45,62 +45,58 @@ def transform_grid(grid: np.ndarray) -> np.ndarray:
                 rank = i
             new_grid[Wall.BOTTOM.rank(), i, j] = rank
 
-    return new_grid
+    return [[list(x) for x in y] for y in new_grid]
 
 
-# rank_dir = {direction: direction.rank() for direction in Wall}
-TOP_RANK = np.uint8(Wall.TOP.rank())
-BOTTOM_RANK = np.uint8(Wall.BOTTOM.rank())
-LEFT_RANK = np.uint8(Wall.LEFT.rank())
-RIGHT_RANK = np.uint8(Wall.RIGHT.rank())
+TOP_RANK = int(Wall.TOP.rank())
+BOTTOM_RANK = int(Wall.BOTTOM.rank())
+LEFT_RANK = int(Wall.LEFT.rank())
+RIGHT_RANK = int(Wall.RIGHT.rank())
 
 
-@nb.jit
-# @nb.jit("UniTuple(uint8[:], 2)(uint8[:,:,:], UniTuple(uint8[:], 2), int64, UniTuple(UniTuple(uint8[:], 2), 4))", nopython=True)
-# @nb.jit(nb.types.UniTuple(nb.uint8[:], 2)(nb.uint8[:, :, :], nb.types.UniTuple(nb.uint8[:], 2), nb.int64, nb.types.UniTuple(nb.types.UniTuple(nb.uint8[:], 2), 4)))
-def move_v3(new_grid: np.ndarray, src: Tuple[int, int], direction_value: int, state: Iterable[Tuple[int, int]]) -> Tuple[numpy.uint8, numpy.uint8]:
+def move_v4(new_grid: List[List[List[int]]], src: Tuple[int, int], direction_value: int, state: Iterable[Tuple[int, int]]) -> Tuple[int, int]:
 
     i, j = src
 
     if direction_value == Wall.LEFT.value:
-        j2 = new_grid[LEFT_RANK, i, j]
+        j2 = new_grid[LEFT_RANK][i][j]
 
         for pos in state:
             if pos[0] == i:
                 if j2 <= pos[1] < j:
-                    j2 = pos[1] + numpy.uint8(1)
+                    j2 = pos[1] + 1
         return i, j2
 
     elif direction_value == Wall.RIGHT.value:
 
-        j2 = new_grid[RIGHT_RANK, i, j]
+        j2 = new_grid[RIGHT_RANK][i][j]
 
         for pos in state:
             if pos[0] == i:
                 if j < pos[1] <= j2:
-                    j2 = pos[1] - numpy.uint8(1)
+                    j2 = pos[1] - 1
 
         return i, j2
 
     elif direction_value == Wall.TOP.value:
 
-        i2 = new_grid[TOP_RANK, i, j]
+        i2 = new_grid[TOP_RANK][i][j]
 
         for pos in state:
             if pos[1] == j:
                 if i2 <= pos[0] < i:
-                    i2 = pos[0] + numpy.uint8(1)
+                    i2 = pos[0] + 1
 
         return i2, j
 
     elif direction_value == Wall.BOTTOM.value:
 
-        i2 = new_grid[BOTTOM_RANK, i, j]
+        i2 = new_grid[BOTTOM_RANK][i][j]
 
         for pos in state:
             if pos[1] == j:
                 if i < pos[0] <= i2:
-                    i2 = pos[0] - numpy.uint8(1)
+                    i2 = pos[0] - 1
 
         return i2, j
 
@@ -140,10 +136,8 @@ def explore_v2(new_grid: np.ndarray, initial_state: Iterable[Tuple[int, int]], d
                     for color in moving_colors:
                         color_rank = color.value
                         for direction in Wall:
-                            new_pos = move_v3(
+                            new_pos = move_v4(
                                 new_grid, state[color_rank], direction.value, state)
-                            new_pos = (
-                                np.uint8(new_pos[0]), np.uint8(new_pos[1]))
                             new_state = state[:color_rank] + \
                                 (new_pos,) + state[color_rank+1:]
                             hash_new_state = hash(new_state)

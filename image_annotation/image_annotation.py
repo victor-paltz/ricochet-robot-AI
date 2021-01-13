@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from ai_robot.ai_robot import move_v3, transform_grid, transform_state_v2
+from ai_robot.ai_robot import move_v4, transform_grid, transform_state_v2
 from image_extraction.board_extraction import (Orientation, extract_board,
                                                perspective_transform)
 from image_extraction.Color import Color
@@ -48,7 +48,7 @@ def draw(path, board_img, state, new_grid):
     moves = []
     for i, (color, direction) in enumerate(path):
         start = tuple([np.uint8(x) for x in state[color]])
-        end = move_v3(new_grid, start, direction.value,
+        end = move_v4(new_grid, start, direction.value,
                       transform_state_v2(state))
         state[color] = end
         moves.append((i, color, direction, start, end))

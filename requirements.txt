@@ -1,6 +1,5 @@
 Flask==1.1.2
 matplotlib==3.2.1
-numba==0.49.0
 numpy==1.18.3
 opencv-python==4.5.1.48
 Pillow==8.1.0
