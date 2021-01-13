@@ -162,7 +162,7 @@ def transform_state_v2(state: Dict[str, Tuple[int, int]]) -> Iterable[Tuple[int,
     return tuple(new_state)
 
 
-def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color, moving_colors=None, rec=13):
+def explore_v2(new_grid: np.ndarray, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color, moving_colors=None, rec=13):
     """
     Faster BFS, needs optimizations
     75 seconds for exploration at distance 13
@@ -214,6 +214,7 @@ def explore_v2(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[in
 
 def optimal_explore(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color):
 
+    # TODO
     other_colors = [c for c in Color if c is not color_dst]
     best_path = None
     best_path_length = 100
