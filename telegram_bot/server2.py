@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Tuple
 
 import telebot
 from flask import Flask, request
@@ -11,10 +12,24 @@ TOKEN = str(os.environ.get("TOKEN", "where-is-my-token"))
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
+SAVE_DIR = "telegram_files"
+os.makedirs(SAVE_DIR, exist_ok=True)
+INPUT_IMAGE_PATH = f"{SAVE_DIR}/image.jpg"
+OUTPUT_IMAGE_PATH = f"{SAVE_DIR}/result.jpeg"
+
+HELP_MESSAGE = ("Welcome to the ricochet-robot solver!\n\n"
+                "1) Send a picture of the boardgame.\n"
+                "2) Send a message of the type: \"COLOR y x\" to get the shortest solution to move the COLOR robot to the case (y,x)\n"
+                "3) Send a new request on the current picture with step 1) or send a new boardgame picture with step 1)\n\n"
+
+                "Ex: If you want to know how the BLUE robot can go to the TOP RIGHT corner, send \"BLUE 1 16\". 1 -> first line, 16 -> last column\n\n"
+                "Pro Tips, \"YELLOW 12 0\", \"Y 12 0\", \"y 12 0\", \"y12 0\" are all accepted")
+
 # handle commands, /start
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Hello, " + message.from_user.first_name)
+    bot.reply_to(
+        message, f"Hello {message.from_user.first_name},\n" + HELP_MESSAGE)
 
 
 # handle all messages, echo response back to users
@@ -22,23 +37,37 @@ def start(message):
 def handle_all_message(message):
     global color
     global target_pos
+
+    color_string_dict = {"r": Color.RED, "b": Color.BLUE, "g": Color.GREEN,
+                         "y": Color.YELLOW}
+
     try:
-        color_string, y, x = message.text.split()
-        color = {"r": Color.RED, "b": Color.BLUE, "g": Color.GREEN,
-                 "y": Color.YELLOW}[color_string[0].lower()]
-        target_pos = int(y), int(x)
-        #bot.reply_to(message, f"Search parameters set on bot {color.name}, target position: {target_pos}")
-
-        save_dir = "telegram_files"
-        os.makedirs(save_dir, exist_ok=True)
-        input_image_path = f"{save_dir}/image.jpg"
-        output_image_path = f"{save_dir}/result.jpeg"
-
-        solve_request(message, input_image_path, output_image_path)
-
+        color_string, y, x = match_query(message.text)
     except:
         bot.reply_to(
-            message, "Send a picture of the boardgame, or give a bot color and a target \"COLOR y x\" \nEx: \"BLUE 0 0\"")
+            message, "Sorry, I don't understand your query, send /start to get some help")
+        return
+
+    if color_string not in color_string_dict:
+        bot.reply_to(
+            message, "Wrong color, color available are RED, BLUE, GREEN and YELLOW")
+        return
+
+    if not (1 <= y <= 16) or not (1 <= x <= 16):
+        bot.reply_to(
+            message, "Wrong target position, lines and colums are in range 1 -> 16")
+        return
+
+    color = color_string_dict[color_string]
+    target_pos = int(y-1), int(x-1)
+
+    if os.path.isfile(INPUT_IMAGE_PATH):
+        solve_request(message, INPUT_IMAGE_PATH, OUTPUT_IMAGE_PATH)
+        return
+    else:
+        bot.reply_to(
+            message, "There is not previously sent picture of the board, please send a picture")
+        return
 
 
 @bot.message_handler(func=lambda message: True, content_types=['photo'])
@@ -48,16 +77,12 @@ def photo(message):
     file_info = bot.get_file(file_id)
     downloaded_file = bot.download_file(file_info.file_path)
 
-    save_dir = "telegram_files"
-    os.makedirs(save_dir, exist_ok=True)
-    input_image_path = f"{save_dir}/image.jpg"
-    output_image_path = f"{save_dir}/result.jpeg"
-
     # save new image
-    with open(input_image_path, 'wb') as new_file:
+    with open(INPUT_IMAGE_PATH, 'wb') as new_file:
         new_file.write(downloaded_file)
 
-    solve_request(message, input_image_path, output_image_path)
+    bot.reply_to(
+        message, "New board game updated! you can now type queries such as \"GREEN 0 0\"")
 
 
 def solve_request(message, input_image_path, output_image_path):
@@ -69,7 +94,7 @@ def solve_request(message, input_image_path, output_image_path):
     initial_img = Image.open(input_image_path)
 
     bot.reply_to(
-        message, f"Starting the solver\nBot {color.name} tries to reach {target_pos}")
+        message, f"Starting the solver\n{color.name} bot tries to reach case {target_pos[0]+1}, {target_pos[1]+1}")
 
     # Solve challenge
     is_solved = solve(initial_img, color=color,
@@ -101,6 +126,53 @@ def webhook():
         return "failed setting webhook", 200
 
 
+def match_query(text: str) -> Tuple[str, int, int]:
+
+    text = text.replace(",", " ").replace("-", " ").strip()
+
+    color = ""
+    for i, c in enumerate(text):
+        if not c.isalpha():
+            break
+        color += c
+
+    if not color:
+        raise ValueError()
+
+    color = color[0].lower()
+
+    rest_text = [x for x in text[i:].split(" ") if x]
+
+    if len(rest_text) == 2:
+        a = "".join(y for y in rest_text[0] if y.isnumeric())
+        b = "".join(y for y in rest_text[1] if y.isnumeric())
+        if not a or not b:
+            raise ValueError()
+        return color, int(a), int(b)
+    elif len(rest_text) == 1:
+        ab = rest_text[0]
+        if len(ab) == 4:
+            return color, int(ab[:2]), int(ab[2:])
+        if len(ab) == 2:
+            return color, int(ab[0]), int(ab[1])
+        if len(ab) == 3:
+            a1, b1 = int(ab[:2]), int(ab[2])
+            a2, b2 = int(ab[0]), int(ab[1:])
+
+            if 1 <= a1 <= 16 and 1 <= b1 <= 16:
+                if 1 <= a2 <= 16 and 1 <= b2 <= 16:
+                    raise ValueError()
+                else:
+                    return color, int(a1), int(b1)
+            elif 1 <= a2 <= 16 and 1 <= b2 <= 16:
+                return color, int(a1), int(b1)
+
+        else:
+            raise ValueError()
+    else:
+        raise ValueError()
+
+
 if __name__ == "__main__":
 
     TESTING = False
@@ -110,6 +182,8 @@ if __name__ == "__main__":
     if TESTING:
         bot.remove_webhook()
         bot.polling()
+        bot.set_webhook(url='https://ricochet-bot.herokuapp.com/' + TOKEN)
+        print("done")
     else:
         gunicorn_logger = logging.getLogger('gunicorn.error')
         app.logger.handlers = gunicorn_logger.handlers

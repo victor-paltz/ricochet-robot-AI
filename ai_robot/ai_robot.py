@@ -45,10 +45,10 @@ def transform_grid(grid: np.ndarray) -> np.ndarray:
 
 
 # rank_dir = {direction: direction.rank() for direction in Wall}
-TOP_RANK = np.uint8(3)
-BOTTOM_RANK = np.uint8(2)
-LEFT_RANK = np.uint8(1)
-RIGHT_RANK = np.uint8(0)
+TOP_RANK = np.uint8(Wall.TOP.rank())
+BOTTOM_RANK = np.uint8(Wall.BOTTOM.rank())
+LEFT_RANK = np.uint8(Wall.LEFT.rank())
+RIGHT_RANK = np.uint8(Wall.RIGHT.rank())
 
 
 @nb.jit
@@ -64,7 +64,7 @@ def move_v3(new_grid: np.ndarray, src: Tuple[int, int], direction_value: int, st
         for pos in state:
             if pos[0] == i:
                 if j2 <= pos[1] < j:
-                    j2 = pos[1]+numpy.uint8(1)
+                    j2 = pos[1] + numpy.uint8(1)
         return i, j2
 
     elif direction_value == Wall.RIGHT.value:
@@ -74,7 +74,7 @@ def move_v3(new_grid: np.ndarray, src: Tuple[int, int], direction_value: int, st
         for pos in state:
             if pos[0] == i:
                 if j < pos[1] <= j2:
-                    j2 = pos[1]-numpy.uint8(1)
+                    j2 = pos[1] - numpy.uint8(1)
 
         return i, j2
 
@@ -85,7 +85,7 @@ def move_v3(new_grid: np.ndarray, src: Tuple[int, int], direction_value: int, st
         for pos in state:
             if pos[1] == j:
                 if i2 <= pos[0] < i:
-                    i2 = pos[0]+numpy.uint8(1)
+                    i2 = pos[0] + numpy.uint8(1)
 
         return i2, j
 
@@ -96,7 +96,7 @@ def move_v3(new_grid: np.ndarray, src: Tuple[int, int], direction_value: int, st
         for pos in state:
             if pos[1] == j:
                 if i < pos[0] <= i2:
-                    i2 = pos[0]-numpy.uint8(1)
+                    i2 = pos[0] - numpy.uint8(1)
 
         return i2, j
 
