@@ -1,3 +1,4 @@
+import logging
 import os
 
 import telebot
@@ -55,15 +56,17 @@ def photo(message):
 
 @app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
+    app.logger.info("get call on / TOKEN")
     bot.process_new_updates(
         [telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "transfert ok", 200
+    return "!", 200
 
 
 @app.route("/")
 def webhook():
     bot.remove_webhook()
     try:
+        app.logger.info("setup webhook")
         bot.set_webhook(url='https://ricochet-bot.herokuapp.com/' + TOKEN)
         return "ok set webhook", 200
     except telebot.apihelper.ApiTelegramException as _:
@@ -71,6 +74,9 @@ def webhook():
 
 
 if __name__ == "__main__":
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
 
 # bot.polling()
