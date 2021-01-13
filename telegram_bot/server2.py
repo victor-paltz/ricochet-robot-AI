@@ -14,8 +14,6 @@ app = Flask(__name__)
 
 SAVE_DIR = "telegram_files"
 os.makedirs(SAVE_DIR, exist_ok=True)
-INPUT_IMAGE_PATH = f"{SAVE_DIR}/image.jpg"
-OUTPUT_IMAGE_PATH = f"{SAVE_DIR}/result.jpeg"
 
 HELP_MESSAGE = ("Welcome to the ricochet-robot solver!\n\n"
                 "1) Send a picture of the boardgame.\n"
@@ -61,8 +59,11 @@ def handle_all_message(message):
     color = color_string_dict[color_string]
     target_pos = int(y-1), int(x-1)
 
-    if os.path.isfile(INPUT_IMAGE_PATH):
-        solve_request(message, INPUT_IMAGE_PATH, OUTPUT_IMAGE_PATH)
+    input_image_path = f"{SAVE_DIR}/{message.chat.id}-input.jpg"
+    output_image_path = f"{SAVE_DIR}/{message.chat.id}-output.jpg"
+
+    if os.path.isfile(input_image_path):
+        solve_request(message, input_image_path, output_image_path)
         return
     else:
         bot.reply_to(
@@ -77,12 +78,14 @@ def photo(message):
     file_info = bot.get_file(file_id)
     downloaded_file = bot.download_file(file_info.file_path)
 
+    input_image_path = f"{SAVE_DIR}/{message.chat.id}-input.jpg"
+
     # save new image
-    with open(INPUT_IMAGE_PATH, 'wb') as new_file:
+    with open(input_image_path, 'wb') as new_file:
         new_file.write(downloaded_file)
 
     bot.reply_to(
-        message, "New board game updated! you can now type queries such as \"GREEN 0 0\"")
+        message, "New board game updated! you can now type queries such as \"GREEN 16 16\" or \"g1616\"")
 
 
 def solve_request(message, input_image_path, output_image_path):
