@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from ai_robot.ai_robot import explore, move, transform_grid, transform_state, transform_state_v2, explore_v2, move_v2
+from ai_robot.ai_robot import transform_grid, transform_state_v2, explore_v2
 from image_extraction.board_extraction import (Orientation, extract_board,
                                                perspective_transform)
 from image_extraction.grid_extraction import (Color, Wall, get_bot_location,
@@ -71,15 +71,9 @@ if __name__ == "__main__":
     new_grid = transform_grid(grid)
 
     start_time = time.time()
-
-    if False:
-        state2 = transform_state(state)
-        #path = explore(new_grid, state2, (3, 6), Color.YELLOW, 11)
-        path = explore(new_grid, state2, (11, 10), Color.RED, 11)
-    else:
-        state_v2 = transform_state_v2(state)
-        path = explore_v2(new_grid, state_v2, (8, 9), Color.YELLOW,
-                          moving_colors=None, rec=14)
+    state_v2 = transform_state_v2(state)
+    path = explore_v2(new_grid, state_v2, (8, 9), Color.YELLOW,
+                      moving_colors=None, rec=14)
 
     print(f"Exploration done in {(time.time()-start_time):.4} s")
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from ai_robot.ai_robot import explore, move, transform_grid, transform_state
+from ai_robot.ai_robot import move_v3, transform_grid, transform_state_v2
 from image_extraction.board_extraction import (Orientation, extract_board,
                                                perspective_transform)
 from image_extraction.grid_extraction import (Color, Wall, get_bot_location,
@@ -47,8 +47,9 @@ def draw(path, board_img, state, new_grid):
 
     moves = []
     for i, (color, direction) in enumerate(path):
-        start = state[color]
-        end = move(new_grid, start, direction, transform_state(state))
+        start = tuple([np.uint8(x) for x in state[color]])
+        end = move_v3(new_grid, start, direction.value,
+                      transform_state_v2(state))
         state[color] = end
         moves.append((i, color, direction, start, end))
 
