@@ -46,7 +46,7 @@ class Wall(IntFlag):
         return 0
 
 
-def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .85) -> List[Tuple[int, int]]:
+def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .86) -> List[Tuple[int, int]]:
 
     if np.sum(black_white_board == 255) > np.sum(black_white_board == 0):
         black_white_board = 255 - black_white_board
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     import time
 
-    names = ["plateau", "plateau2", "plateau3", "plateau4"]
+    names = ["plateau", "plateau2", "plateau3", "plateau4", "plateau11"]
 
     plt.figure(figsize=(3*len(names), 6))
 

@@ -173,7 +173,7 @@ def match_query(text: str) -> Tuple[str, int, int]:
                 else:
                     return color, int(a1), int(b1)
             elif 1 <= a2 <= 16 and 1 <= b2 <= 16:
-                return color, int(a1), int(b1)
+                return color, int(a2), int(b2)
 
         else:
             raise ValueError()

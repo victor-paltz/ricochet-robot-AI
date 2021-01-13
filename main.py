@@ -42,8 +42,8 @@ def solve(img, color=Color.YELLOW, target_pos=(8, 9), output_path="result.jpeg")
 
 if __name__ == "__main__":
 
-    names = ["plateau", "plateau2", "plateau3", "plateau4"]
-    name = names[0]
+    names = ["plateau", "plateau2", "plateau3", "plateau4", "plateau11"]
+    name = names[-1]
 
     initial_img = Image.open(f"images/{name}.jpeg")
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     state_v2 = transform_state_v2(state)
-    path = explore_v2(new_grid, state_v2, (8, 9), Color.YELLOW,
+    path = explore_v2(new_grid, state_v2, (1, 9), Color.YELLOW,
                       moving_colors=None, rec=14)
 
     print(f"Exploration done in {(time.time()-start_time):.4} s")
