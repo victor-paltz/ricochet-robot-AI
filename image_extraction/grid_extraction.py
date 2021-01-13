@@ -13,7 +13,7 @@ from image_extraction.Color import Color
 from image_extraction.Wall import Wall
 
 
-def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .86) -> List[Tuple[int, int]]:
+def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .90) -> List[Tuple[int, int]]:
 
     if np.sum(black_white_board == 255) > np.sum(black_white_board == 0):
         black_white_board = 255 - black_white_board
@@ -72,7 +72,7 @@ def get_wall_grid(board: np.ndarray) -> np.ndarray:
     grid[9, 7:9] |= Wall.TOP
 
     # create matching templates for vertical and horizontal walls
-    vertical_template = 255*np.ones((32, 8), np.uint8)
+    vertical_template = 255*np.ones((32, 5), np.uint8)
     horizontal_template = np.rot90(vertical_template, 1)
 
     # Add vertical walls in the grid
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     import time
 
-    names = ["plateau", "plateau2", "plateau3", "plateau4", "board222"]
+    names = ["plateau", "plateau2", "board2", "board22", "board222"]
 
     plt.figure(figsize=(3*len(names), 6))
 
