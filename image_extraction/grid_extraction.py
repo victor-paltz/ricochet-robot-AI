@@ -9,41 +9,8 @@ import numpy as np
 from PIL import Image
 
 from image_extraction.board_extraction import extract_board
-
-
-@unique
-class Color(IntFlag):
-    BLUE = 0
-    YELLOW = 1
-    GREEN = 2
-    RED = 3
-    #BLACK = 4
-
-    def rgb_color(self):
-        return {Color.BLUE: (0, 153, 255),
-                Color.YELLOW: (0, 255, 255),
-                Color.GREEN: (0, 255, 0),
-                Color.RED: (255, 0, 0)}[self]
-
-
-@unique
-class Wall(IntFlag):
-    TOP = int("1000", 2)
-    BOTTOM = int("0100", 2)
-    LEFT = int("0010", 2)
-    RIGHT = int("0001", 2)
-
-    def rank(self):
-        """
-        returns int(np.log2(direction.value))-1 but faster
-        """
-        if self is Wall.TOP:
-            return 3
-        if self is Wall.BOTTOM:
-            return 2
-        if self is Wall.LEFT:
-            return 1
-        return 0
+from image_extraction.Color import Color
+from image_extraction.Wall import Wall
 
 
 def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .86) -> List[Tuple[int, int]]:

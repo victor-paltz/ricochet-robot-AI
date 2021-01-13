@@ -1,13 +1,17 @@
-from itertools import product
+from itertools import combinations, product
 from typing import Dict, Iterable, List, Tuple
 
 import numba as nb
 import numpy
 import numpy as np
 from image_extraction.board_extraction import Orientation
-from image_extraction.grid_extraction import (Color, Wall, get_bot_location,
+
+from image_extraction.grid_extraction import (get_bot_location,
                                               get_wall_grid, pretty_print,
                                               split_board)
+
+from image_extraction.Color import Color, revert_color_value
+from image_extraction.Wall import Wall
 
 
 def transform_grid(grid: np.ndarray) -> np.ndarray:
@@ -134,13 +138,14 @@ def explore_v2(new_grid: np.ndarray, initial_state: Iterable[Tuple[int, int]], d
                 seen.add(hash_state)
                 if n != rec - 1:
                     for color in moving_colors:
-                        i = color.value
+                        color_rank = color.value
                         for direction in Wall:
                             new_pos = move_v3(
-                                new_grid, state[i], direction.value, state)
+                                new_grid, state[color_rank], direction.value, state)
                             new_pos = (
                                 np.uint8(new_pos[0]), np.uint8(new_pos[1]))
-                            new_state = state[:i] + (new_pos,) + state[i+1:]
+                            new_state = state[:color_rank] + \
+                                (new_pos,) + state[color_rank+1:]
                             hash_new_state = hash(new_state)
 
                             if hash_new_state not in seen and hash_new_state not in path:
@@ -162,17 +167,21 @@ def explore_v2(new_grid: np.ndarray, initial_state: Iterable[Tuple[int, int]], d
 
 def optimal_explore(new_grid, initial_state: Iterable[Tuple[int, int]], dst: Tuple[int, int], color_dst: Color):
 
-    # TODO
     other_colors = [c for c in Color if c is not color_dst]
+
     best_path = None
     best_path_length = 100
-    rec = 30
 
-    p0 = explore_v2(new_grid, initial_state, dst, color_dst,
-                    moving_colors=[color_dst], rec=best_path_length)
-    if p0 is not None and len(p0) < best_path_length:
-        best_path_length = len(p0)
-        best_path = p0
+    rec_depths = [100, 20, 13, 10, 7, 3][:len(other_colors)]
 
-    for c in Color:
-        pass
+    for nb_other_bot_moving, rec_depth in enumerate(rec_depth):
+        for colors_sample in combinations(other_colors, nb_other_bot_moving):
+
+            p0 = explore_v2(new_grid, initial_state, dst, color_dst,
+                            moving_colors=colors_sample,
+                            rec=min(best_path_length, rec_depth))
+            if p0 is not None and len(p0) < best_path_length:
+                best_path_length = len(p0)
+                best_path = p0
+
+    return best_path

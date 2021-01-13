@@ -4,7 +4,7 @@ from typing import Tuple
 
 import telebot
 from flask import Flask, request
-from image_extraction.grid_extraction import Color
+from image_extraction.Color import Color
 from main import solve
 from PIL import Image
 

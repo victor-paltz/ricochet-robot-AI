@@ -4,14 +4,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
-
 from ai_robot.ai_robot import move_v3, transform_grid, transform_state_v2
 from image_extraction.board_extraction import (Orientation, extract_board,
                                                perspective_transform)
-from image_extraction.grid_extraction import (Color, Wall, get_bot_location,
-                                              get_wall_grid, pretty_print,
-                                              split_board)
+from image_extraction.Color import Color
+from image_extraction.grid_extraction import (get_bot_location, get_wall_grid,
+                                              pretty_print, split_board)
+from image_extraction.Wall import Wall
+from PIL import Image
 
 
 def img_coord_from_case(case):

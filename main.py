@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from ai_robot.ai_robot import transform_grid, transform_state_v2, explore_v2
+from ai_robot.ai_robot import explore_v2, transform_grid, transform_state_v2
+from image_annotation.image_annotation import draw
 from image_extraction.board_extraction import (Orientation, extract_board,
                                                perspective_transform)
-from image_extraction.grid_extraction import (Color, Wall, get_bot_location,
-                                              get_wall_grid, pretty_print,
-                                              split_board)
-from image_annotation.image_annotation import draw
+from image_extraction.Color import Color
+from image_extraction.grid_extraction import (get_bot_location, get_wall_grid,
+                                              pretty_print, split_board)
+from image_extraction.Wall import Wall
 
 plt.switch_backend('Agg')
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     state_v2 = transform_state_v2(state)
-    path = explore_v2(new_grid, state_v2, (1, 9), Color.YELLOW,
+    path = explore_v2(new_grid, state_v2, (9, 12), Color.YELLOW,
                       moving_colors=None, rec=14)
 
     print(f"Exploration done in {(time.time()-start_time):.4} s")
