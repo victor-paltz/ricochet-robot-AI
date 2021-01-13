@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     import time
 
-    names = ["plateau", "plateau2", "plateau3", "plateau4", "plateau11"]
+    names = ["plateau", "plateau2", "plateau3", "plateau4", "board222"]
 
     plt.figure(figsize=(3*len(names), 6))
 
