@@ -114,13 +114,13 @@ def get_bot_location(board_grid: np.ndarray) -> Dict[str, Tuple[int, int]]:
 
     hsv_bounderies = {}
     hsv_bounderies[Color.RED] = {"lower": np.array(
-        [120, 100, 120]), "upper": np.array([140, 255, 255])}
+        [120, 100, 10]), "upper": np.array([140, 255, 255])}
     hsv_bounderies[Color.YELLOW] = {"lower": np.array(
-        [90, 100, 120]), "upper": np.array([120, 255, 255])}
+        [90, 100, 10]), "upper": np.array([120, 255, 255])}
     hsv_bounderies[Color.BLUE] = {"lower": np.array(
-        [0, 100, 120]), "upper": np.array([20, 255, 255])}
+        [0, 100, 10]), "upper": np.array([20, 255, 255])}
     hsv_bounderies[Color.GREEN] = {"lower": np.array(
-        [40, 100, 120]), "upper": np.array([90, 255, 255])}
+        [40, 100, 10]), "upper": np.array([90, 255, 255])}
 
     bot_pos = {}
 
