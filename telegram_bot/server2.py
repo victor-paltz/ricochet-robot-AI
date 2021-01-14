@@ -16,11 +16,18 @@ SAVE_DIR = "telegram_files"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 HELP_MESSAGE = ("Welcome to the ricochet-robot solver!\n\n"
-                "1) Send a picture of the boardgame.\n"
-                "2) Send a message of the type: \"COLOR y x\" to get the shortest solution to move the COLOR robot to the case (y,x)\n"
-                "3) Send a new request on the current picture with step 1) or send a new boardgame picture with step 1)\n\n"
 
-                "Ex: If you want to know how the BLUE robot can go to the TOP RIGHT corner, send \"BLUE 1 16\". 1 -> first line, 16 -> last column\n\n"
+                "1) Send a picture of the boardgame.\n"
+                "\t-> Take the picture from above\n"
+                "\t-> Avoid to hide the walls with the robots\n"
+                "\t-> Try to use an uniform light\n"
+                "\t-> Avoid a background with lines\n\n"
+
+                "2) Send a message of the type: \"COLOR y x\" to get the shortest solution to move the COLOR robot to the case in column number y and line number x\n\n"
+
+                "3) Send a new request on the current picture with step 1) or send a new boardgame picture with step 1)\n\n\n"
+
+                "Ex: If you want to know how the BLUE robot can go to the TOP RIGHT corner, send \"BLUE 1 16\" (1 -> first line, 16 -> last column)\n\n"
                 "Pro Tips, \"YELLOW 12 5\", \"Y 12 5\", \"y 12 5\", \"y125\" are all accepted")
 
 # handle commands, /start
@@ -112,7 +119,8 @@ def solve_request(message, input_image_path, output_image_path):
         with open(output_image_path, 'rb') as new_file:
             bot.send_photo(chat_id=message.chat.id, photo=new_file)
     else:
-        bot.reply_to(message, "No solution found :(")
+        bot.reply_to(
+            message, "No solution found :(\n(Max depth exploration: 10)")
 
 
 @app.route('/' + TOKEN, methods=['POST'])
