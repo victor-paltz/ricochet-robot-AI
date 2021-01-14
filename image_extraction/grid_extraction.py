@@ -9,11 +9,11 @@ import numpy as np
 from PIL import Image
 
 from image_extraction.board_extraction import extract_board
-from image_extraction.Color import Color
+from image_extraction.Color import Color, HSV_BOUNDERIES
 from image_extraction.Wall import Wall
 
 
-def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .90) -> List[Tuple[int, int]]:
+def case_match(black_white_board: np.ndarray, template: np.ndarray, threshold: float = .89) -> List[Tuple[int, int]]:
 
     if np.sum(black_white_board == 255) > np.sum(black_white_board == 0):
         black_white_board = 255 - black_white_board
@@ -32,19 +32,28 @@ def get_wall_grid(board: np.ndarray) -> np.ndarray:
 
     # Put image in black and white to match walls
     board2 = cv2.bilateralFilter(board, 19, 75, 75)
+    #hsv = cv2.cvtColor(board2, cv2.COLOR_BGR2HSV)
     gray = cv2.cvtColor(board2, cv2.COLOR_BGR2GRAY)
     blur = cv2.bilateralFilter(gray, 3, 75, 75)
     thresh = cv2.adaptiveThreshold(
         blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 21, 15)
 
+    # Mask the content of the tiles at x%
     tile_size = 32
-    zoom = 0.8
+    zoom = 0.76
     half_cache_size = int(round(zoom*tile_size//2))
     for i in range(16):
         for j in range(16):
             y, x = int((i+.5)*tile_size), int((j+.5)*tile_size)
             thresh[y-half_cache_size:y+half_cache_size,
                    x-half_cache_size:x+half_cache_size] = 255
+
+    # TODO improve idea
+    # # Mask colorful objects of the board
+    # mask = np.zeros(hsv.shape[:2], dtype=np.uint8)
+    # for color, boundery in HSV_BOUNDERIES.items():
+    #     mask |= cv2.inRange(hsv, boundery["lower"], boundery["upper"])
+    # thresh[mask == 255] = 255
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     edges2 = cv2.dilate(thresh, kernel, iterations=1)
@@ -112,16 +121,6 @@ def split_board(board: np.ndarray, grid_size: int = 16, zoom: float = 1.) -> np.
 
 def get_bot_location(board_grid: np.ndarray) -> Dict[str, Tuple[int, int]]:
 
-    hsv_bounderies = {}
-    hsv_bounderies[Color.RED] = {"lower": np.array(
-        [120, 100, 10]), "upper": np.array([140, 255, 255])}
-    hsv_bounderies[Color.YELLOW] = {"lower": np.array(
-        [90, 100, 10]), "upper": np.array([120, 255, 255])}
-    hsv_bounderies[Color.BLUE] = {"lower": np.array(
-        [0, 100, 10]), "upper": np.array([20, 255, 255])}
-    hsv_bounderies[Color.GREEN] = {"lower": np.array(
-        [40, 100, 10]), "upper": np.array([90, 255, 255])}
-
     bot_pos = {}
 
     for color in Color:
@@ -132,8 +131,8 @@ def get_bot_location(board_grid: np.ndarray) -> Dict[str, Tuple[int, int]]:
                     continue
                 img = board_grid[i, j]
                 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-                mask = cv2.inRange(hsv, hsv_bounderies[color]["lower"],
-                                   hsv_bounderies[color]["upper"])
+                mask = cv2.inRange(hsv, HSV_BOUNDERIES[color]["lower"],
+                                   HSV_BOUNDERIES[color]["upper"])
                 matchs.append((np.sum(mask), (i, j)))
         bot_pos[color] = sorted(matchs, reverse=True)[0][1]
 
